@@ -47,6 +47,6 @@ func translate(honks string) string {
   if translation, found := honkTranslations[honks]; found {
     return translation
   } else {
-    return "I don't recognise those honks"
+    return "Failed to convert honks. Perhaps you misheard?"
   }
 }
