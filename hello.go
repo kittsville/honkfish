@@ -5,12 +5,18 @@ import (
     "os"
     "log"
     "net/http"
+    "strings"
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
     r.ParseForm()
-    honks := r.Form.Get("text")
-    fmt.Fprintf(w, "%s!", translate(honks))
+    rawHonks := r.Form.Get("text")
+    honks := strings.Replace(rawHonks, "honk", "s", -1)
+    honks = strings.Replace(honks, "HONK", "l", -1)
+    honks = strings.Replace(honks, "pause", "p", -1)
+    honks = strings.Replace(honks, " ", "", -1)
+    translation := translate(honks)
+    fmt.Fprintf(w, "Boat: %s\nTranslation: %s", rawHonks, translation)
 }
 
 func main() {
