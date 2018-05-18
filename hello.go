@@ -11,6 +11,12 @@ import (
 func handler(w http.ResponseWriter, r *http.Request) {
     r.ParseForm()
     rawHonks := r.Form.Get("text")
+
+    if rawHonks == "help" || rawHonks == "usage" {
+      fmt.Fprintf(w, "Usage:\n`/honkfish honk pause HONK`\nhonk = short honk\nHONK = long honk\npause = a gap between honks")
+      return
+    }
+
     honks := strings.Replace(rawHonks, "honk", "s", -1)
     honks = strings.Replace(honks, "HONK", "l", -1)
     honks = strings.Replace(honks, "pause", "p", -1)
