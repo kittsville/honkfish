@@ -1,10 +1,26 @@
 package main
 
-import "fmt"
+import (
+    "fmt"
+    "os"
+    "log"
+    "net/http"
+)
+
+func handler(w http.ResponseWriter, r *http.Request) {
+    r.ParseForm()
+    honks := r.Form.Get("text")
+    fmt.Fprintf(w, "%s!", translate(honks))
+}
 
 func main() {
-  fmt.Println(translate("s"))
-  fmt.Println(translate("sss"))
+    http.HandleFunc("/", handler)
+    port, customPort := os.LookupEnv("PORT")
+    if !customPort {
+      port = "8080"
+    }
+
+    log.Fatal(http.ListenAndServe(":" + port, nil))
 }
 
 func translate(honks string) string {
