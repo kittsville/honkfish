@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -8,12 +9,22 @@ import (
 	"strings"
 )
 
+type SlackResponse struct {
+	ResponseType string `json:"response_type"`
+	Text         string `json:"text"`
+}
+
 func handler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	rawHonks := r.Form.Get("text")
 
 	if rawHonks == "help" || rawHonks == "usage" {
-		fmt.Fprintf(w, "Usage:\n`/honkfish honk pause HONK`\nhonk = short honk\nHONK = long honk\npause = a gap between honks")
+		response := SlackResponse{
+			ResponseType: "ephemeral",
+			Text:         "Usage:\n`/honkfish honk pause HONK`\nhonk = short honk\nHONK = long honk\npause = a gap between honks",
+		}
+
+		sendResponse(w, response)
 		return
 	}
 
@@ -22,7 +33,13 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	honks = strings.Replace(honks, "pause", "p", -1)
 	honks = strings.Replace(honks, " ", "", -1)
 	translation := translate(honks)
-	fmt.Fprintf(w, "Boat: %s\nTranslation: %s", rawHonks, translation)
+
+	response := SlackResponse{
+		ResponseType: "in_channel",
+		Text:         fmt.Sprintf("Translation: %s", translation),
+	}
+
+	sendResponse(w, response)
 }
 
 func main() {
@@ -61,4 +78,17 @@ func translate(honks string) string {
 	} else {
 		return "Failed to convert honks. Perhaps you misheard?"
 	}
+}
+
+// Handles JSON marshalling and sending response to client
+func sendResponse(w http.ResponseWriter, response SlackResponse) {
+	j, err := json.Marshal(response)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(j)
 }
