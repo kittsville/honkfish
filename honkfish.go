@@ -33,32 +33,8 @@ var dictionary = map[string]string{
 	"HONK pause honk pause HONK pause honk" : "I agree to be overtaken",
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
-	userInput := r.Form.Get("text")
-
-	if userInput == "help" || userInput == "usage" {
-		response := SlackResponse{
-			ResponseType: "ephemeral",
-			Text:         "Usage:\n`/honkfish honk pause HONK`\nhonk = short honk\nHONK = long honk\npause = a gap between honks",
-		}
-
-		sendResponse(w, response)
-		return
-	}
-
-	translation := translate(userInput)
-
-	response := SlackResponse{
-		ResponseType: "in_channel",
-		Text:         fmt.Sprintf("Translation: %s", translation),
-	}
-
-	sendResponse(w, response)
-}
-
 func main() {
-	http.HandleFunc("/", handler)
+	http.HandleFunc("/", requestHandler)
 	port, customPort := os.LookupEnv("PORT")
 	if !customPort {
 		port = "8080"
@@ -67,12 +43,42 @@ func main() {
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
-func translate(honks string) string {
-	if translation, found := dictionary[honks]; found {
-		return translation
-	} else {
-		return "Failed to convert honks. Perhaps you misheard?"
+func requestHandler(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	userInput := r.Form.Get("text")
+
+	switch userInput {
+	case "help":
+		sendResponse(w, usageText())
+	case "usage":
+		sendResponse(w, usageText())
+	default:
+		sendResponse(w, translateHonks(userInput))
 	}
+}
+
+func translateHonks(honks string) SlackResponse {
+	translation, found := dictionary[honks]
+
+	if !found {
+		translation = "Failed to convert honks. Perhaps you misheard?"
+	}
+
+	response := SlackResponse{
+		ResponseType: "in_channel",
+		Text:         fmt.Sprintf("Translation: %s", translation),
+	}
+
+	return response
+}
+
+func usageText() SlackResponse {
+	response := SlackResponse{
+		ResponseType: "ephemeral",
+		Text:         "Usage:\n`/honkfish honk pause HONK`\nhonk = short honk\nHONK = long honk\npause = a gap between honks",
+	}
+
+	return response
 }
 
 // Handles JSON marshalling and sending response to client
