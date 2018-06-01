@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 )
 
 type SlackResponse struct {
@@ -14,11 +13,31 @@ type SlackResponse struct {
 	Text         string `json:"text"`
 }
 
+/*
+	Translation map from honks to the boat's behaviour
+	s = short honk
+	l = long honk
+	p = pause between honks
+*/
+var dictionary = map[string]string{
+	"honk" 																	: "I am altering my course to STARBOARD",
+	"honk honk" 														: "I am altering my course to PORT",
+	"honk honk honk" 												: "I am going ASTERN",
+	"honk honk honk honk pause honk" 				: "I am turning through 360 degrees to STARBOARD",
+	"honk honk honk honk pause honk honk" 	: "I am turning through 360 degrees to PORT",
+	"honk honk honk honk honk" 							: "I do not understand your intentions, *keep clear*, I doubt whether you are taking sufficient action to avoid a collision",
+	"HONK" 																	: "I am about to get underway, enter the fairway or I am approaching a blind bend",
+	"HONK pause honk pause honk" 						: "I am unable to manoeuvre - not under command",
+	"HONK pause HONK pause honk" 						: "I intend to overtake you on YOUR STARBOARD side",
+	"HONK pause HONK pause honk pause honk" : "I intend to overtake you on YOUR PORT side",
+	"HONK pause honk pause HONK pause honk" : "I agree to be overtaken",
+}
+
 func handler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	rawHonks := r.Form.Get("text")
+	userInput := r.Form.Get("text")
 
-	if rawHonks == "help" || rawHonks == "usage" {
+	if userInput == "help" || userInput == "usage" {
 		response := SlackResponse{
 			ResponseType: "ephemeral",
 			Text:         "Usage:\n`/honkfish honk pause HONK`\nhonk = short honk\nHONK = long honk\npause = a gap between honks",
@@ -28,11 +47,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	honks := strings.Replace(rawHonks, "honk", "s", -1)
-	honks = strings.Replace(honks, "HONK", "l", -1)
-	honks = strings.Replace(honks, "pause", "p", -1)
-	honks = strings.Replace(honks, " ", "", -1)
-	translation := translate(honks)
+	translation := translate(userInput)
 
 	response := SlackResponse{
 		ResponseType: "in_channel",
@@ -53,27 +68,7 @@ func main() {
 }
 
 func translate(honks string) string {
-	honkTranslations := make(map[string]string)
-
-	/*
-	  Translation map from honks to the boat's behaviour
-	  s = short honk
-	  l = long honk
-	  p = pause between honks
-	*/
-	honkTranslations["s"] = "I am altering my course to STARBOARD"
-	honkTranslations["ss"] = "I am altering my course to PORT"
-	honkTranslations["sss"] = "I am going ASTERN"
-	honkTranslations["ssssps"] = "I am turning through 360 degrees to STARBOARD"
-	honkTranslations["sssspss"] = "I am turning through 360 degrees to PORT"
-	honkTranslations["sssss"] = "I do not understand your intentions, *keep clear*, I doubt whether you are taking sufficient action to avoid a collision"
-	honkTranslations["l"] = "I am about to get underway, enter the fairway or I am approaching a blind bend"
-	honkTranslations["lpsps"] = "I am unable to manoeuvre - not under command"
-	honkTranslations["lplps"] = "I intend to overtake you on YOUR STARBOARD side"
-	honkTranslations["lplpsps"] = "I intend to overtake you on YOUR PORT side"
-	honkTranslations["lpsplps"] = "I agree to be overtaken"
-
-	if translation, found := honkTranslations[honks]; found {
+	if translation, found := dictionary[honks]; found {
 		return translation
 	} else {
 		return "Failed to convert honks. Perhaps you misheard?"
