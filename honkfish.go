@@ -52,6 +52,10 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 		sendResponse(w, usageText())
 	case "usage":
 		sendResponse(w, usageText())
+	case "list":
+		sendResponse(w, honksList())
+	case "all":
+		sendResponse(w, honksList())
 	default:
 		sendResponse(w, translateHonks(userInput))
 	}
@@ -76,6 +80,21 @@ func usageText() SlackResponse {
 	response := SlackResponse{
 		ResponseType: "ephemeral",
 		Text:         "Usage:\n`/honkfish honk pause HONK`\nhonk = short honk\nHONK = long honk\npause = a gap between honks",
+	}
+
+	return response
+}
+
+func honksList() SlackResponse {
+	formattedHonks := "Honks:"
+
+	for k, v := range dictionary {
+		formattedHonks += fmt.Sprintf("\n_%s_ -> %s", k, v)
+	}
+
+	response := SlackResponse{
+		ResponseType: "ephemeral",
+		Text:         formattedHonks,
 	}
 
 	return response
