@@ -20,17 +20,17 @@ type SlackResponse struct {
 	p = pause between honks
 */
 var dictionary = map[string]string{
-	"honk" 																	: "I am altering my course to STARBOARD",
-	"honk honk" 														: "I am altering my course to PORT",
-	"honk honk honk" 												: "I am going ASTERN",
-	"honk honk honk honk pause honk" 				: "I am turning through 360 degrees to STARBOARD",
-	"honk honk honk honk pause honk honk" 	: "I am turning through 360 degrees to PORT",
-	"honk honk honk honk honk" 							: "I do not understand your intentions, *keep clear*, I doubt whether you are taking sufficient action to avoid a collision",
-	"HONK" 																	: "I am about to get underway, enter the fairway or I am approaching a blind bend",
-	"HONK pause honk pause honk" 						: "I am unable to manoeuvre - not under command",
-	"HONK pause HONK pause honk" 						: "I intend to overtake you on YOUR STARBOARD side",
-	"HONK pause HONK pause honk pause honk" : "I intend to overtake you on YOUR PORT side",
-	"HONK pause honk pause HONK pause honk" : "I agree to be overtaken",
+	"honk":                                "I am altering my course to STARBOARD",
+	"honk honk":                           "I am altering my course to PORT",
+	"honk honk honk":                      "I am going ASTERN",
+	"honk honk honk honk pause honk":      "I am turning through 360 degrees to STARBOARD",
+	"honk honk honk honk pause honk honk": "I am turning through 360 degrees to PORT",
+	"honk honk honk honk honk":            "I do not understand your intentions, *keep clear*, I doubt whether you are taking sufficient action to avoid a collision",
+	"HONK": "I am about to get underway, enter the fairway or I am approaching a blind bend",
+	"HONK pause honk pause honk":            "I am unable to manoeuvre - not under command",
+	"HONK pause HONK pause honk":            "I intend to overtake you on YOUR STARBOARD side",
+	"HONK pause HONK pause honk pause honk": "I intend to overtake you on YOUR PORT side",
+	"HONK pause honk pause HONK pause honk": "I agree to be overtaken",
 }
 
 func main() {
