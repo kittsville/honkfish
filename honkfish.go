@@ -6,12 +6,19 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sort"
 )
 
 type SlackResponse struct {
 	ResponseType string `json:"response_type"`
 	Text         string `json:"text"`
 }
+
+type Alphabetically []string
+
+func (s Alphabetically) Len() int           { return len(s) }
+func (s Alphabetically) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
+func (s Alphabetically) Less(i, j int) bool { return len(s[i]) < len(s[j]) }
 
 /*
 	Translation map from honks to the boat's behaviour
@@ -88,8 +95,16 @@ func usageText() SlackResponse {
 func honksList() SlackResponse {
 	formattedHonks := "Honks:"
 
-	for k, v := range dictionary {
-		formattedHonks += fmt.Sprintf("\n_%s_ -> %s", k, v)
+	var honks []string
+
+	for key, _ := range dictionary {
+		honks = append(honks, key)
+	}
+
+	sort.Sort(Alphabetically(honks))
+
+	for _, honk := range honks {
+		formattedHonks += fmt.Sprintf("\n_%s_ -> %s", honk, dictionary[honk])
 	}
 
 	response := SlackResponse{
