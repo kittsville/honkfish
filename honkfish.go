@@ -97,7 +97,7 @@ func honksList() slackResponse {
 
 	var honks []string
 
-	for key, _ := range dictionary {
+	for key := range dictionary {
 		honks = append(honks, key)
 	}
 
