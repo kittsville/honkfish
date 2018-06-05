@@ -9,16 +9,16 @@ import (
 	"sort"
 )
 
-type SlackResponse struct {
+type slackResponse struct {
 	ResponseType string `json:"response_type"`
 	Text         string `json:"text"`
 }
 
-type Alphabetically []string
+type alphabetically []string
 
-func (s Alphabetically) Len() int           { return len(s) }
-func (s Alphabetically) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
-func (s Alphabetically) Less(i, j int) bool { return len(s[i]) < len(s[j]) }
+func (s alphabetically) Len() int           { return len(s) }
+func (s alphabetically) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
+func (s alphabetically) Less(i, j int) bool { return len(s[i]) < len(s[j]) }
 
 /*
 	Translation map from honks to the boat's behaviour
@@ -68,14 +68,14 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func translateHonks(honks string) SlackResponse {
+func translateHonks(honks string) slackResponse {
 	translation, found := dictionary[honks]
 
 	if !found {
 		translation = "Failed to convert honks. Perhaps you misheard?"
 	}
 
-	response := SlackResponse{
+	response := slackResponse{
 		ResponseType: "in_channel",
 		Text:         fmt.Sprintf("Translation: %s", translation),
 	}
@@ -83,8 +83,8 @@ func translateHonks(honks string) SlackResponse {
 	return response
 }
 
-func usageText() SlackResponse {
-	response := SlackResponse{
+func usageText() slackResponse {
+	response := slackResponse{
 		ResponseType: "ephemeral",
 		Text:         "Usage:\n`/honkfish honk pause HONK`\nhonk = short honk\nHONK = long honk\npause = a gap between honks",
 	}
@@ -92,7 +92,7 @@ func usageText() SlackResponse {
 	return response
 }
 
-func honksList() SlackResponse {
+func honksList() slackResponse {
 	formattedHonks := "Honks:"
 
 	var honks []string
@@ -101,13 +101,13 @@ func honksList() SlackResponse {
 		honks = append(honks, key)
 	}
 
-	sort.Sort(Alphabetically(honks))
+	sort.Sort(alphabetically(honks))
 
 	for _, honk := range honks {
 		formattedHonks += fmt.Sprintf("\n_%s_ -> %s", honk, dictionary[honk])
 	}
 
-	response := SlackResponse{
+	response := slackResponse{
 		ResponseType: "ephemeral",
 		Text:         formattedHonks,
 	}
@@ -116,7 +116,7 @@ func honksList() SlackResponse {
 }
 
 // Handles JSON marshalling and sending response to client
-func sendResponse(w http.ResponseWriter, response SlackResponse) {
+func sendResponse(w http.ResponseWriter, response slackResponse) {
 	j, err := json.Marshal(response)
 
 	if err != nil {
