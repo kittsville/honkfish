@@ -38,6 +38,7 @@ var dictionary = map[string]string{
 	"HONK pause HONK pause honk":            "I intend to overtake you on YOUR STARBOARD side",
 	"HONK pause HONK pause honk pause honk": "I intend to overtake you on YOUR PORT side",
 	"HONK pause honk pause HONK pause honk": "I agree to be overtaken",
+	"pause pause pause pause HONK HONK": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
 }
 
 func main() {
