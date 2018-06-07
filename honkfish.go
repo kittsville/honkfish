@@ -20,6 +20,8 @@ func (s alphabetically) Len() int           { return len(s) }
 func (s alphabetically) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 func (s alphabetically) Less(i, j int) bool { return len(s[i]) < len(s[j]) }
 
+var version = "1.3"
+
 /*
 	Translation map from honks to the boat's behaviour
 	s = short honk
@@ -38,7 +40,7 @@ var dictionary = map[string]string{
 	"HONK pause HONK pause honk":            "I intend to overtake you on YOUR STARBOARD side",
 	"HONK pause HONK pause honk pause honk": "I intend to overtake you on YOUR PORT side",
 	"HONK pause honk pause HONK pause honk": "I agree to be overtaken",
-	"pause pause pause pause HONK HONK": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+	"pause pause pause pause HONK HONK":     "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
 }
 
 func main() {
@@ -64,6 +66,8 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 		sendResponse(w, honksList())
 	case "all":
 		sendResponse(w, honksList())
+	case "version":
+		sendResponse(w, botVersion())
 	default:
 		sendResponse(w, translateHonks(userInput))
 	}
@@ -111,6 +115,15 @@ func honksList() slackResponse {
 	response := slackResponse{
 		ResponseType: "ephemeral",
 		Text:         formattedHonks,
+	}
+
+	return response
+}
+
+func botVersion() slackResponse {
+	response := slackResponse{
+		ResponseType: "ephemeral",
+		Text:         "I am Honkfish Version " + version,
 	}
 
 	return response
