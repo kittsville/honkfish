@@ -109,7 +109,9 @@ func honksList() slackResponse {
 	sort.Sort(alphabetically(honks))
 
 	for _, honk := range honks {
-		formattedHonks += fmt.Sprintf("\n_%s_ -> %s", honk, dictionary[honk])
+		if honk != "pause pause pause pause HONK HONK" {
+			formattedHonks += fmt.Sprintf("\n_%s_ -> %s", honk, dictionary[honk])
+		}
 	}
 
 	response := slackResponse{
