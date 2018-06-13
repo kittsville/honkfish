@@ -20,7 +20,7 @@ func (s alphabetically) Len() int           { return len(s) }
 func (s alphabetically) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 func (s alphabetically) Less(i, j int) bool { return len(s[i]) < len(s[j]) }
 
-var version = "1.3"
+var version = "1.4"
 
 /*
 	Translation map from honks to the boat's behaviour
