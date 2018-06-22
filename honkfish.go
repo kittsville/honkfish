@@ -7,6 +7,9 @@ import (
 	"net/http"
 	"os"
 	"sort"
+
+	"github.com/arbovm/levenshtein"
+	"github.com/bradfitz/slice"
 )
 
 type slackResponse struct {
@@ -20,15 +23,12 @@ func (s alphabetically) Len() int           { return len(s) }
 func (s alphabetically) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 func (s alphabetically) Less(i, j int) bool { return len(s[i]) < len(s[j]) }
 
-var version = "1.4"
+var version = "1.5"
 
 /*
 	Translation map from honks to the boat's behaviour
-	s = short honk
-	l = long honk
-	p = pause between honks
 */
-var dictionary = map[string]string{
+var optionsWithDesc = map[string]string{
 	"honk":                                "I am altering my course to STARBOARD",
 	"honk honk":                           "I am altering my course to PORT",
 	"honk honk honk":                      "I am going ASTERN",
@@ -41,6 +41,17 @@ var dictionary = map[string]string{
 	"HONK pause HONK pause honk pause honk": "I intend to overtake you on YOUR PORT side",
 	"HONK pause honk pause HONK pause honk": "I agree to be overtaken",
 	"pause pause pause pause HONK HONK":     "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+}
+
+// A slice of the keys from `optionsWithDesc` so we can do operations with just
+// those.
+var options = []string{}
+
+// Init is called before main, used for initialisers in Go.
+func init() {
+	for k := range optionsWithDesc {
+		options = append(options, k)
+	}
 }
 
 func main() {
@@ -74,10 +85,19 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func translateHonks(honks string) slackResponse {
-	translation, found := dictionary[honks]
+	translation, found := optionsWithDesc[honks]
 
 	if !found {
-		translation = "Failed to convert honks. Perhaps you misheard?"
+		// If couldn't find the honk that was asked for exactly, let's use
+		// Levenstien distance to suggest the closest two matches.
+		optionsSortedByDistance := options[:]
+		slice.Sort(optionsSortedByDistance, func(i, j int) bool {
+			return levenshtein.Distance(options[i], honks) < levenshtein.Distance(options[j], honks)
+		})
+
+		// There will always be at least two in here, so it's safe for us to just
+		// assume the indexes exist.
+		translation = fmt.Sprintf("Failed to convert honks. Perhaps you misheard? Did you mean '%s' or '%s'?", optionsSortedByDistance[0], optionsSortedByDistance[1])
 	}
 
 	response := slackResponse{
@@ -102,7 +122,7 @@ func honksList() slackResponse {
 
 	var honks []string
 
-	for key := range dictionary {
+	for key := range optionsWithDesc {
 		honks = append(honks, key)
 	}
 
@@ -110,7 +130,7 @@ func honksList() slackResponse {
 
 	for _, honk := range honks {
 		if honk != "pause pause pause pause HONK HONK" {
-			formattedHonks += fmt.Sprintf("\n_%s_ -> %s", honk, dictionary[honk])
+			formattedHonks += fmt.Sprintf("\n_%s_ -> %s", honk, optionsWithDesc[honk])
 		}
 	}
 
