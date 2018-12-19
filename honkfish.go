@@ -23,7 +23,7 @@ func (s alphabetically) Len() int           { return len(s) }
 func (s alphabetically) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 func (s alphabetically) Less(i, j int) bool { return len(s[i]) < len(s[j]) }
 
-var version = "1.5"
+var version = "1.5-BIRTHDAY-EDITION.1"
 
 /*
 	Translation map from honks to the boat's behaviour
@@ -41,6 +41,7 @@ var optionsWithDesc = map[string]string{
 	"HONK pause HONK pause honk pause honk": "I intend to overtake you on YOUR PORT side",
 	"HONK pause honk pause HONK pause honk": "I agree to be overtaken",
 	"pause pause pause pause HONK HONK":     "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+	"HONK HONK":                             "Happy Birthday Dave!",
 }
 
 // A slice of the keys from `optionsWithDesc` so we can do operations with just
